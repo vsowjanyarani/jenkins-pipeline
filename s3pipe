@@ -1,0 +1,15 @@
+pipeline {
+    agent any
+    stages {
+        stage('test AWS credentials') {
+            steps {
+                withAWS(credentials: 'aws credentials', region: 'us-east-2') {
+                    sh 'echo "hello Jenkins">hello.txt'
+                    s3Upload acl: 'Private', bucket: 'mybucketveeresh', file: 'hello.txt'
+                    s3Download bucket: 'mybucketveeresh', file: 'downloadedHello.txt', path: 'hello.txt'
+                    sh 'cat downloadedHello.txt'
+                }
+            }
+        }
+    }
+}
