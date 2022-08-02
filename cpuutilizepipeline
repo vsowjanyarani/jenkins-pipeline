@@ -1,0 +1,16 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Hello') {
+            steps {
+                sh ''' a=`df -h | grep /dev/root | awk \'{print $5}\'` '''
+            }
+        }
+    }
+    post {
+        success {
+            slackSend channel: "alert", message: " build success"   
+        }
+    }
+}
