@@ -1,0 +1,23 @@
+node{
+    try{
+        stage('git clone') {
+                git 'https://github.com/nveeresh133/Assignments.git'
+            }
+         stage('cal build') {
+                sh 'bash assign1/calculator1.sh'
+            }
+    notifySuccessful()
+}   catch (e) {
+    currentBuild.result = "FAILED"
+    notifyFailed()
+    throw e
+  }
+}
+def notifySuccessful(){
+    emailext ( body: 'build success', subject: 'build', to: 'veereshnagavi10@gmail.com')
+}
+
+def notifyFailed(){
+    emailext ( body: 'build failed', subject: 'build', to: 'veereshnagavi10@gmail.com')
+}
+
