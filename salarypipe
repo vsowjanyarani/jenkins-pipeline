@@ -1,0 +1,22 @@
+node{
+    try{
+        stage('git clone') {
+                git 'https://github.com/nveeresh133/Assignments.git'
+            }
+         stage('sal build') {
+                sh 'bash assign1/netsalary1.sh $B'
+            }
+    notifySuccessful()
+}   catch (e) {
+    currentBuild.result = "FAILED"
+    notifyFailed()
+    throw e
+  }
+}
+def notifySuccessful(){
+    slackSend channel: '#alert', message: 'build success(veeresh)', teamDomain: 'aatmaaniacademy', tokenCredentialId: '9bea0b80-f17b-44e4-a8fd-b72ae109b857'
+}
+
+def notifyFailed(){
+    slackSend channel: '#alert', message: 'build failure(veeresh)', teamDomain: 'aatmaaniacademy', tokenCredentialId: '9bea0b80-f17b-44e4-a8fd-b72ae109b857'
+}
