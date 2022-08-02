@@ -1,0 +1,43 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('maven install') {
+            steps {
+                sh 'sudo apt-get install maven -y'
+            }
+        }
+        stage('maven project') {
+            steps {
+               git 'https://github.com/nveeresh133/Assignments.git'
+            }
+        }
+        stage('clean install') {
+            steps {
+               sh '''cd web-project
+               mvn clean install'''
+            }
+        }
+        stage('war file to tomcat/webapps') {
+            steps {
+               sh '''cd web-project/target
+              sudo cp web-project.war /home/ubuntu/tomcat/webapps'''
+            }
+        }
+         stage('tomcat restart') {
+            steps {
+              sh ''' sudo bash /home/ubuntu/tomcat/bin/shutdown.sh
+               sudo bash /home/ubuntu/tomcat/bin/startup.sh'''
+            }
+        }
+         stage('s3') {
+            steps {
+             withAWS(credentials: 'aws credentials', region: 'us-east-2') {
+            sh '''
+            cd web-project/target
+            aws s3 cp web-project.war s3://mybucketveeresh/
+            '''}
+            }
+        }
+    }
+}
