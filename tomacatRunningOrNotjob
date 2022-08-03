@@ -1,0 +1,43 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('maven installation') {
+            steps {
+                sh 'sudo apt-get install maven -y'
+            }
+        }
+        stage('create a maven sample war project') {
+            steps {
+                git 'https://github.com/namrata4447/S3Maven.git'
+            }
+        }   
+        stage('pom.xml') {
+            steps {
+                sh '''cd /var/lib/jenkins/workspace/'Maven pipeline project'/mavenwebapp/trucks
+                mvn clean install'''
+            }
+        }
+        stage('tomcat') {
+            steps {
+                sh '''cd /var/lib/jenkins/workspace/'Maven pipeline project'/mavenwebapp/trucks/target
+                cp trucks.war /home/ubuntu/tomcat/webapps'''
+            }
+        }
+        stage('S3 with aws credentials') {
+            steps {
+                withAWS(credentials: 'jenkins user', region: 'us-east-2') {
+                sh '''cd /var/lib/jenkins/workspace/'Maven pipeline project'/mavenwebapp/trucks/target
+                aws s3 cp /home/ubuntu/tomcat/webapps/trucks.war s3://namrata-s3job-bucket/
+                '''
+                }
+            }
+        }
+        stage('tomcat restart') {
+            steps {
+                sh ''' sudo bash /home/ubuntu/tomcat/bin/shutdown.sh
+                sudo bash /home/ubuntu/tomcat/bin/startup.sh '''
+            }
+        }
+    }
+}
